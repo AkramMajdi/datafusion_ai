@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Data Fusion AI{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-card {
+        border-radius: 12px;
+        padding: 24px;
+        background: white;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-bottom: 12px;
+    }
+    .kpi-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1F3864;
+        line-height: 1;
+    }
+    .kpi-label {
+        font-size: 0.85rem;
+        color: #888;
+        margin-top: 4px;
+    }
+    .kpi-change {
+        font-size: 0.8rem;
+        margin-top: 8px;
+    }
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        height: 100%;
+    }
+    .chart-card h6 {
+        font-weight: 700;
+        color: #1F3864;
+        margin-bottom: 16px;
+        font-size: 0.95rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1>Dashboard</h1>
+        <p class="text-muted mb-0">Analytics overview — Data Fusion AI</p>
+    </div>
+    <div class="text-muted small">
+        <i class="bi bi-clock me-1"></i>
+        Last updated: {% now "M d, Y H:i" %}
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#e8f4fd;">
+                <i class="bi bi-currency-dollar text-primary"></i>
+            </div>
+            <div class="kpi-value">
+                {{ kpis.total_revenue|floatformat:0 }}
+            </div>
+            <div class="kpi-label">Total Revenue (JOD)</div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#e8f8f0;">
+                <i class="bi bi-people text-success"></i>
+            </div>
+            <div class="kpi-value">{{ kpis.total_customers }}</div>
+            <div class="kpi-label">Total Customers</div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#fff8e1;">
+                <i class="bi bi-graph-up text-warning"></i>
+            </div>
+            <div class="kpi-value">{{ kpis.avg_arpu|floatformat:1 }}</div>
+            <div class="kpi-label">Avg ARPU (JOD)</div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#fce8f3;">
+                <i class="bi bi-bag-check text-danger"></i>
+            </div>
+            <div class="kpi-value">{{ kpis.total_sales }}</div>
+            <div class="kpi-label">Total Sales</div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#ede8fc;">
+                <i class="bi bi-funnel" style="color:#7F77DD;"></i>
+            </div>
+            <div class="kpi-value">{{ kpis.total_leads }}</div>
+            <div class="kpi-label">Total Leads</div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#e8faf4;">
+                <i class="bi bi-percent text-success"></i>
+            </div>
+            <div class="kpi-value">{{ kpis.conversion_rate }}%</div>
+            <div class="kpi-label">Conversion Rate</div>
+        </div>
+    </div>
+
+    <!-- Behavior Analytics Summary -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card p-3"
+             style="background:linear-gradient(135deg,#1F3864,#2d5299);
+                    border-radius:12px;">
+            <div class="d-flex align-items-center
+                        justify-content-between flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="background:rgba(255,255,255,0.15);
+                                border-radius:10px; padding:10px 14px;">
+                        <i class="bi bi-activity text-white fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-white fw-bold">
+                            User Behavior Tracking
+                        </div>
+                        <div style="color:rgba(255,255,255,0.7);
+                                    font-size:0.85rem;">
+                            Live session and page visit monitoring
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-4">
+                    <div class="text-center">
+                        <div class="text-white fw-bold fs-5">
+                            {{ analytics.total_visits }}
+                        </div>
+                        <div style="color:rgba(255,255,255,0.7);
+                                    font-size:0.8rem;">
+                            Page Visits
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-white fw-bold fs-5">
+                            {{ analytics.total_sessions }}
+                        </div>
+                        <div style="color:rgba(255,255,255,0.7);
+                                    font-size:0.8rem;">
+                            Sessions
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-white fw-bold fs-5">
+                            {{ analytics.active_users }}
+                        </div>
+                        <div style="color:rgba(255,255,255,0.7);
+                                    font-size:0.8rem;">
+                            Active Users
+                        </div>
+                    </div>
+                </div>
+                <a href="/core/analytics/"
+                   class="btn btn-light btn-sm px-4">
+                    <i class="bi bi-arrow-right me-1"></i>
+                    View Full Analytics
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<div class="row g-3 mb-3">
+
+    <div class="col-lg-8">
+        <div class="chart-card">
+            <h6><i class="bi bi-graph-up-arrow me-2"></i>Revenue by Month (JOD)</h6>
+            <canvas id="revenueChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h6><i class="bi bi-pie-chart me-2"></i>Customers by Segment</h6>
+            <canvas id="segmentChart" height="180"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3 mb-3">
+
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h6><i class="bi bi-megaphone me-2"></i>Top Campaigns by Revenue (JOD)</h6>
+            <canvas id="campaignChart" height="140"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="chart-card">
+            <h6><i class="bi bi-diagram-3 me-2"></i>Sales by Channel</h6>
+            <canvas id="channelChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="chart-card">
+            <h6><i class="bi bi-funnel me-2"></i>Leads by Stage</h6>
+            <canvas id="leadsChart" height="200"></canvas>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const COLORS = [
+    '#378ADD','#1D9E75','#BA7517','#D85A30',
+    '#7F77DD','#E24B4A','#639922','#D4537E',
+    '#888780','#0F6E56',
+];
+
+fetch('/dashboard/api/charts/')
+    .then(r => r.json())
+    .then(data => {
+
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'line',
+            data: {
+                labels: data.revenue_by_month.labels,
+                datasets: [{
+                    label: 'Revenue (JOD)',
+                    data: data.revenue_by_month.data,
+                    borderColor: '#378ADD',
+                    backgroundColor: 'rgba(55,138,221,0.08)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('segmentChart'), {
+            type: 'doughnut',
+            data: {
+                labels: data.customers_by_segment.labels,
+                datasets: [{
+                    data: data.customers_by_segment.data,
+                    backgroundColor: COLORS,
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 11 }, padding: 8 }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('campaignChart'), {
+            type: 'bar',
+            data: {
+                labels: data.top_campaigns.labels,
+                datasets: [{
+                    label: 'Revenue (JOD)',
+                    data: data.top_campaigns.data,
+                    backgroundColor: '#378ADD',
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                    x: { grid: { display: false },
+                         ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('channelChart'), {
+            type: 'doughnut',
+            data: {
+                labels: data.sales_by_channel.labels,
+                datasets: [{
+                    data: data.sales_by_channel.data,
+                    backgroundColor: COLORS,
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 10 }, padding: 6 }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('leadsChart'), {
+            type: 'bar',
+            data: {
+                labels: data.leads_by_stage.labels,
+                datasets: [{
+                    label: 'Leads',
+                    data: data.leads_by_stage.data,
+                    backgroundColor: '#1D9E75',
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                    y: { grid: { display: false },
+                         ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+
+    });
+</script>
+{% endblock %}

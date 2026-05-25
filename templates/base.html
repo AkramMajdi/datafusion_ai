@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Data Fusion AI{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; }
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: #1F3864;
+            position: fixed;
+            top: 0; left: 0;
+            padding-top: 20px;
+        }
+        .sidebar .brand {
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.75);
+            padding: 10px 20px;
+            border-radius: 0;
+            font-size: 0.9rem;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+        }
+        .sidebar .nav-link i { margin-right: 8px; }
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .page-header {
+            margin-bottom: 24px;
+        }
+        .page-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1F3864;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="brand">
+        <i class="bi bi-cpu"></i> Data Fusion AI
+    </div>
+    <nav class="nav flex-column mt-3">
+        <a href="/dashboard/" class="nav-link {% block nav_dashboard %}{% endblock %}">
+            <i class="bi bi-grid-1x2"></i> Dashboard
+        </a>
+        <a href="/etl/upload/" class="nav-link {% block nav_etl %}{% endblock %}">
+            <i class="bi bi-upload"></i> ETL Pipeline
+        </a>
+        <a href="/core/analytics/" class="nav-link {% block nav_analytics %}{% endblock %}">
+    <i class="bi bi-activity"></i> Behavior Analytics
+</a>
+        <a href="/etl/sources/" class="nav-link">
+            <i class="bi bi-database"></i> Data Sources
+        </a>
+    
+        <a href="/admin/" class="nav-link">
+            <i class="bi bi-gear"></i> Admin Panel
+        </a>
+    </nav>
+</div>
+
+<div class="main-content">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
