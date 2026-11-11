@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}ETL Pipeline — Data Fusion AI{% endblock %}
+{% block nav_etl %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-upload me-2"></i>ETL Pipeline</h1>
+    <p class="text-muted">Upload your dataset and the system will extract, clean, and load it automatically.</p>
+</div>
+
+<div class="row">
+
+    <div class="col-lg-5">
+        <div class="card p-4 mb-4">
+            <h5 class="fw-bold mb-3">Upload New Dataset</h5>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Dataset Name</label>
+                    {{ form.name }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">File Type</label>
+                    {{ form.source_type }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">File</label>
+                    {{ form.file }}
+                    <div class="form-text">Supported: .xlsx, .xls, .csv</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Description</label>
+                    {{ form.description }}
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-play-circle me-2"></i>Run ETL Pipeline
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3">Recent Import Jobs</h5>
+            {% if recent_jobs %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Dataset</th>
+                            <th>Status</th>
+                            <th>Rows Loaded</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in recent_jobs %}
+                        <tr>
+                            <td class="text-muted">{{ job.id }}</td>
+                            <td><strong>{{ job.data_source.name }}</strong></td>
+                            <td>
+                                {% if job.status == 'completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif job.status == 'failed' %}
+                                    <span class="badge bg-danger">Failed</span>
+                                {% elif job.status == 'running' %}
+                                    <span class="badge bg-warning text-dark">Running</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ job.rows_loaded }}</td>
+                            <td class="text-muted">{{ job.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'etl:job_detail' job.pk %}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <p class="text-muted text-center py-4">
+                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                    No imports yet. Upload your first dataset above.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

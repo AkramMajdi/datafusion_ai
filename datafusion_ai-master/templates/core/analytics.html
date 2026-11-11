@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+{% block title %}Behavior Analytics — Data Fusion AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        text-align: center;
+    }
+    .kpi-icon {
+        width: 48px; height: 48px;
+        border-radius: 12px;
+        display: flex; align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin: 0 auto 12px;
+    }
+    .kpi-value {
+        font-size: 2rem; font-weight: 700;
+        color: #1F3864; line-height: 1;
+    }
+    .kpi-label {
+        font-size: 0.85rem; color: #888; margin-top: 4px;
+    }
+    .chart-card {
+        background: white; border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .chart-card h6 {
+        font-weight: 700; color: #1F3864;
+        margin-bottom: 16px; font-size: 0.95rem;
+    }
+    .feed-item {
+        display: flex; align-items: center;
+        gap: 12px; padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.85rem;
+    }
+    .feed-path {
+        font-family: monospace;
+        background: #f0f2f5;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+    .badge-device {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-activity me-2"></i>Behavior Analytics</h1>
+        <p class="text-muted mb-0">User tracking and behavior analysis</p>
+    </div>
+    <a href="/dashboard/" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-grid me-1"></i>Dashboard
+    </a>
+</div>
+
+<!-- KPI Summary -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#e8f4fd;">
+                <i class="bi bi-eye text-primary"></i>
+            </div>
+            <div class="kpi-value">{{ summary.total_visits }}</div>
+            <div class="kpi-label">Total Page Visits</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#e8f8f0;">
+                <i class="bi bi-person-check text-success"></i>
+            </div>
+            <div class="kpi-value">{{ summary.total_sessions }}</div>
+            <div class="kpi-label">Total Sessions</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#fff8e1;">
+                <i class="bi bi-people text-warning"></i>
+            </div>
+            <div class="kpi-value">{{ summary.active_users }}</div>
+            <div class="kpi-label">Active Users</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#fce8f3;">
+                <i class="bi bi-file-earmark-text text-danger"></i>
+            </div>
+            <div class="kpi-value">{{ summary.avg_pages }}</div>
+            <div class="kpi-label">Avg Pages / Session</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="chart-card">
+            <h6><i class="bi bi-calendar3 me-2"></i>
+                Visits — Last 30 Days</h6>
+            <canvas id="dailyChart" height="100"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h6><i class="bi bi-phone me-2"></i>
+                Visits by Device</h6>
+            <canvas id="deviceChart" height="180"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="row g-3 mb-3">
+    <div class="col-12">
+        <div class="chart-card">
+            <h6><i class="bi bi-clock me-2"></i>
+                Peak Usage Hours (00:00 – 23:00)</h6>
+            <canvas id="hourChart" height="60"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Tables Row -->
+<div class="row g-3 mb-3">
+
+    <!-- Top pages -->
+    <div class="col-lg-5">
+        <div class="chart-card">
+            <h6><i class="bi bi-bar-chart me-2"></i>
+                Most Visited Pages</h6>
+            <table class="table table-sm table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Path</th>
+                        <th class="text-end">Visits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for page in top_pages %}
+                    <tr>
+                        <td class="text-muted">{{ forloop.counter }}</td>
+                        <td><span class="feed-path">{{ page.path }}</span></td>
+                        <td class="text-end fw-bold">{{ page.visits }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-3">
+                            No visits recorded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Most active users -->
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <h6><i class="bi bi-person-lines-fill me-2"></i>
+                Most Active Users</h6>
+            <table class="table table-sm table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>User</th>
+                        <th class="text-end">Visits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in active_users %}
+                    <tr>
+                        <td>
+                            <i class="bi bi-person-circle me-1 text-muted"></i>
+                            {{ u.username }}
+                        </td>
+                        <td class="text-end fw-bold">{{ u.visits }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center text-muted py-3">
+                            No user data yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Live feed -->
+    <div class="col-lg-3">
+        <div class="chart-card" style="max-height:400px; overflow-y:auto;">
+            <h6><i class="bi bi-activity me-2"></i>Live Feed</h6>
+            {% for visit in recent %}
+            <div class="feed-item">
+                <div class="flex-grow-1">
+                    <div>
+                        <strong>
+                            {{ visit.user.username|default:"Anonymous" }}
+                        </strong>
+                        <span class="badge-device ms-1
+                            {% if visit.device_type == 'mobile' %}
+                                bg-warning text-dark
+                            {% elif visit.device_type == 'tablet' %}
+                                bg-info text-dark
+                            {% else %}
+                                bg-secondary
+                            {% endif %}
+                            badge">
+                            {{ visit.device_type }}
+                        </span>
+                    </div>
+                    <div class="feed-path mt-1">{{ visit.path }}</div>
+                    <div class="text-muted" style="font-size:0.75rem;">
+                        {{ visit.visited_at|date:"H:i:s" }}
+                        — {{ visit.response_time_ms }}ms
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted text-center py-3">
+                No visits yet. Browse around!
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const COLORS = [
+    '#378ADD','#1D9E75','#BA7517',
+    '#D85A30','#7F77DD','#E24B4A',
+];
+
+fetch('/core/api/analytics/')
+    .then(r => r.json())
+    .then(data => {
+
+        // Daily visits line chart
+        new Chart(document.getElementById('dailyChart'), {
+            type: 'line',
+            data: {
+                labels: data.visits_by_day.labels,
+                datasets: [{
+                    label: 'Visits',
+                    data: data.visits_by_day.data,
+                    borderColor: '#378ADD',
+                    backgroundColor: 'rgba(55,138,221,0.08)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true,
+                         grid: { color: '#f0f0f0' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Device doughnut
+        new Chart(document.getElementById('deviceChart'), {
+            type: 'doughnut',
+            data: {
+                labels: data.device_breakdown.labels,
+                datasets: [{
+                    data: data.device_breakdown.data,
+                    backgroundColor: COLORS,
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 11 }, padding: 8 }
+                    }
+                }
+            }
+        });
+
+        // Peak hours bar chart
+        new Chart(document.getElementById('hourChart'), {
+            type: 'bar',
+            data: {
+                labels: data.visits_by_hour.labels,
+                datasets: [{
+                    label: 'Visits',
+                    data: data.visits_by_hour.data,
+                    backgroundColor: data.visits_by_hour.data.map(
+                        v => v === Math.max(...data.visits_by_hour.data)
+                            ? '#D85A30'
+                            : '#378ADD'
+                    ),
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true,
+                         grid: { color: '#f0f0f0' } },
+                    x: { grid: { display: false },
+                         ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
